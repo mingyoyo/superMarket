@@ -1,0 +1,25 @@
+.goods-add{
+    .el-card{
+        .el-card__header{
+            font-size: 20px;
+            font-weight: bold;
+            color:#6f6f6f;
+        }
+        .el-card__body{
+            .item{
+                .el-form{
+                    .el-form-item{
+                        .el-form-item__content{
+                            .el-input:not(:first-child){
+                                display: inline;
+                                .el-input__inner{
+                                    display: inline!important;  /* 不起作用，还是成不了一行 */
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
