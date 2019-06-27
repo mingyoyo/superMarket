@@ -44,24 +44,36 @@
 <script>
 //引入检测密码的正则函数
 import {passwordReg} from '@/utils/validator.js'
+//引入local
+import local from '@/utils/local.js'
 export default {
   data () {
     //自定义原密码验证函数
     const checkOldPasssword = (rule,value,callback) => {
-      if(value === ''){
-        callback(new Error('原密码不能为空'))
-      }else if(!passwordReg){
-        callback(new Error('密码必须同时包含数字和字母'))
-      }else{
-        callback()
+      let params = {
+        oldPassword:value
       }
+      this.request.get('/account/editpassword',params)
+        .then(res => {
+          let {code,reason} = res;
+          if(code === 0){
+            callback()
+          }else if(code === 1){
+            callback(new Error(reason));
+          }
+        })
+        .catch(err => {
+          console.loe(err)
+        })
     }
     //自定义新密码验证函数
     const checkNewPasssword = (rule,value,callback) => {
       if(value === ''){
         callback(new Error('新密码不能为空'))
-      }else if(!passwordReg){
-        callback(new Error('密码必须同时包含数字和字母'))
+      }else if(value.length <3 || value.length>6){
+        callback(new Error('密码需在3-6位之间'))
+      }else if(!passwordReg(value)){
+        callback(new Error('新密码必须同时包含数字和字母'))
       }else{
         if(this.modifyPassword.checkPass){
           this.$refs.modifyPassword.validateField('checkPass')
@@ -97,8 +109,31 @@ export default {
     }
   },
   methods:{
+    //确认修改函数
     modifyForm(){
-      alert('确认修改密码吗？')
+      let params = {
+        newPassword:this.modifyPassword.newPassword
+      }
+      this.request.post('/account/confirmpassword',params)
+        .then(res => {
+          console.log(res)
+          let {code,reason} = res;
+          if(code === 0){
+            this.$message({
+              type:'success',
+              message:reason
+            })
+          }else if(code ===1){
+            this.$message.error(reason)
+          }
+          //删除token
+          local.remove('bugaosuni')
+          //跳转到登录页面
+          this.$router.push('/login')
+        })
+        .catch(err => {
+          console.log(err)
+        })
     }
   }
 };

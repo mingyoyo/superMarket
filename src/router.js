@@ -26,10 +26,15 @@ export default new Router({
           path: '/home/systeminfo',
           component: () => import('./views/SystemInfo/SystemInfo.vue'),
         },
+        //个人中心
+        {
+          path:'/home/personalinfo',
+          component:() => import('./views/personalInfo/personalInfo.vue')
+        },
         //添加管理员
         {
           path: '/home/addadmin',
-          component: () => import('./views/AddAdmin/AaaAdmin.vue'),
+          component: () => import('./views/AddAdmin/AddAdmin.vue'),
         },
         //管理员账号
         {
@@ -95,7 +100,7 @@ export default new Router({
         {
           path: '/home/addmember',
           component: () => import('./views/AddMember/AddMember.vue'),
-        },
+        }
       ]
     }
   ]

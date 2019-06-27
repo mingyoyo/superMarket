@@ -43,9 +43,13 @@
 //引入验证密码的函数
 import { passwordReg } from "@/utils/validator"; //export暴露的需要用解构的方式引入
 //import passwordReg from '@/utils/validator'    //export defalut暴露的不需要用解构的方式引入
+
+//引入local
+import local from "@/utils/local";
+
 export default {
   data() {
-    //函数写在return之前
+    //验证规则引用的函数写在return之前
     //确认密码的自定义验证函数
     const comfirmPassword = (rule, value, callback) => {
       //rule--验证规则对象，value--用户输入的值，callback--回调函数
@@ -110,13 +114,29 @@ export default {
       this.$refs.loginForm.validate((valid) => {
         //如果所有前端验证都通过，valid就是true，否则就是false
         if(valid){
-          let params = {       //把数据用变了保存起来，用于提交给后端验证数据，这里暂时提交不了
+          let params = {       //把数据用变量保存起来
             account:this.loginForm.account,
             password:this.loginForm.password
           }
-          //跳转至后台
-          alert("登录成功")
-          this.$router.push('/home/systeminfo')  //this.$router是路由对象，调用路由对象中的push方法
+          //将用户名和密码发送给后端，验证是否存在
+          this.request.post('/login/checklogin',params)
+            .then(res => {
+              let {code,reason,token} = res;
+              if(code === 0){
+                //把token存入浏览器
+                local.save('bugaosuni',token)
+                this.$message({
+                  type:'success',
+                  message:reason
+                })
+                this.$router.push('/home/systeminfo')
+              }else if(code === 1){
+                this.$message.error(reason)
+              }
+            })
+            .catch(err =>{
+              console.log(err)
+            })
         }else{
           console.log('前端验证不通过，不允许提交！')
           return;   //结束
@@ -134,5 +154,3 @@ export default {
 @import url("./login.less");
 </style>
 
-
-/* 报错都是因为名字没有一致-- */

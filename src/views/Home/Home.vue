@@ -9,12 +9,12 @@
       <el-container>
         <!-- 头 -->
         <el-header>
-            <Top></Top>
+            <Top ref="top"></Top>
         </el-header>
         <!-- 中 -->
         <el-main>          
           <!-- 路由出口 -->
-          <router-view></router-view>
+          <router-view @A="B"></router-view>
         </el-main>
         <!-- 尾 -->
         <el-footer>
@@ -37,6 +37,11 @@ export default {
     LeftNav: LeftNav,
     Top,
     Buttom
+  },
+  methods:{
+    B(){
+      this.$refs.top.getUserInfo()
+    }
   }
 };
 </script>

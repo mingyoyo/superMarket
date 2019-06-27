@@ -32,8 +32,8 @@
             <el-input type="password" v-model="accountAddForm.checkPass" autocomplete="off"></el-input>
           </el-form-item>
           <!-- 选择用户组 -->
-          <el-form-item label="选择用户组" prop="uesrGroup">
-            <el-select v-model="accountAddForm.uesrGroup" placeholder="请选择用户组" style="width:250px;">
+          <el-form-item label="选择用户组" prop="userGroup">
+            <el-select v-model="accountAddForm.userGroup" placeholder="请选择用户组" style="width:250px;">
               <el-option label="超级管理员" value="超级管理员"></el-option>
               <el-option label="普通用户" value="普通用户"></el-option>
             </el-select>
@@ -54,10 +54,35 @@
 import {passwordReg} from '@/utils/validator'
 export default {
   data() {
-    //自定义验证密码函数
+    //验证账号名是否重复
+    const checkAccount = (rule,value,callback) => {
+      if(value === ''){
+        callback(new Error('账号不能为空'))
+      }else if(value.length < 3 || value.length > 6){
+        callback(new Error('账号长度在3-6位之间'))
+      }
+      let  params = {
+        newAccount : this.accountAddForm.account
+      }
+      this.request.get('/account/checkaccount',params)
+        .then(res => {
+          let {code,reason} = res;
+          if(code === 0){
+            callback()
+          }else if(code === 1){
+            callback(new Error(reason))
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    }
+    //自定义验证密码函数  --使修改他也能验证是否和确认密码框一致
     const checkPassword = (rule,value,callback) => {
       if(value === ''){
         callback(new Error('密码不能为空'))
+      }else if(value.length<3 && value.length>6){
+        callback(new Error('密码长度在3-6位之间'))
       }else if(!passwordReg(value)){
         callback(new Error('密码需要数字和字母组合'))
       }else{
@@ -89,12 +114,11 @@ export default {
       rules: {
         //账号
         account:[
-          {required:true,message:'账号不能为空',trigger:'blur'},
-          {min:3,max:6,message:'账号长度在3-6位之间',trigger:'blur'}
+          {required:true,validator:checkAccount,trigger:'blur'}
         ],
         //密码
         password:[
-          {required:true,validator:checkPassword,trigger:'blur'}
+          {required:true,validator:checkPassword,trigger:'blur'},
         ],
         //确认密码
         checkPass:[
@@ -108,7 +132,7 @@ export default {
     };
   },
   methods:{
-    //登录
+    //添加
     submitForm(){    //调用表单的validate()方法
       this.$refs.accountAddForm.validate(valid => {
         //如果所有前端验证都通过，valid就是true，否则就是false
@@ -116,11 +140,40 @@ export default {
           let params = {  //将数据用变量保存起来,提交给后台
             account:this.accountAddForm.account,
             password:this.accountAddForm.password,
-            uesrGroup:this.accountAddForm.userGroup
+            userGroup:this.accountAddForm.userGroup
           }
-          //后台验证，假如成功，就跳转到管理员账号管理页面
-          alert('添加成功')
-          this.$router.push('/home/adminaccount') 
+          //发送axios请求，把数据发给后端
+         this.request.post('/account/addadmin',params)
+            .then(res => {
+              //console.log(res)  {code: 0, reason: "添加账号成功"}
+              let {code,reason} = res;
+              if(code === 0){  //成功
+                  //弹成功提示
+                  this.$message({
+                    type:'seccess',
+                    message:reason
+                  })
+                  //跳转账号管理
+                  this.$router.push('/home/adminaccount')
+              }else if(code === 1){   // 失败
+              //弹失败提示
+                this.$message.error(reason)
+              }
+            })
+            .catch(err => {
+              console.log(err)
+            })
+          
+          //更加语义化的方法：
+          /* addadmin('url',params)
+            .then(res => {
+              console.log(res)
+            })
+            .catch(err => {
+              console.log(err)
+            }) */
+
+          //this.$router.push('/home/adminaccount') 
         }else{
           alert('前端验证失败，不允许添加')
         }

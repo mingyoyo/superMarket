@@ -60,31 +60,13 @@
 export default {
   data() {
     return {
-      memberTable: [
-        {
-          CardNumber: "11111",
-          name: "张三三",
-          level: "金牌会员",
-          score: "800",
-          discount: '50%',
-          cellphone: '13225526980',
-          seatNumber:'028-26648524'
-        },
-        {
-          CardNumber: "22222",
-          name: "李四四",
-          level: "普通会员",
-          score: "0",
-          discount: '90%',
-          cellphone: '15988264565',
-          seatNumber:'028-26645921'
-        }
-      ],
+      memberTable: [],
       currentPage: 1, //当前页码
       total: 50
     };
   },
   methods: {
+    //分页请求数据
     handleEdit() {
       //修改
     },
@@ -93,6 +75,9 @@ export default {
     },
     handleSizeChange() {},
     handleCurrentChange() {}
+  },
+  created(){
+
   }
 };
 </script>
